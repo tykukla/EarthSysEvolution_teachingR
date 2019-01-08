@@ -1,7 +1,7 @@
 # R activities for the Evolution of Earth Systems course
 These files to aid the R modeling component of the Earth System Evolution course -- Stanford Univ. 2019
 
-## Lecture 1: setting up R and the basics
+## Lecture 1: Intro to R - Tutorial
 This is the "Intro to R - Tutorial.Rmd" file. Before opening in RStudio, make sure you have installed the packages:
 
 1. ggplot2
