@@ -1,0 +1,742 @@
+---
+title: "Intro to R - Tutorial"
+author: "Tyler Kukla"
+date: "1/5/19"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = FALSE)
+breakfast <- function(myName, myNumber){print(paste(myName, "ate", myNumber, "eggs for breakfast today", sep=' '))}
+add1000 <- function(my1000){if(my1000==1000){print(paste("My two numbers add to 1000! I passed!"))
+  }else{"My numbers do NOT equal 1000... Should I pull out my calculator???"} }
+```
+
+## Introduction
+
+This tutorial will cover some of the basics in coding with R and is designed for beginners with no-to-little experience. We will cover a number of exercises that involve directly writing and entering code, just as you might in a script of your own. While we will eventually work on creating our own scripts, the goal right now is to cover the basic syntax. 
+
+In this exercise we will cover the following topics: 
+
+1. Comments
+2. Math
+3. Logical statements
+4. Functions
+5. Data structures
+6. "For" loops
+7. Data visualization
+
+*If you have any questions about this tutorial feel free to contact me - tykukla@stanford.edu*
+
+## 1. Comments
+
+In R the **pound sign (or "hashtag" [#])** is used to "comment-out" text in a script. Any text that is commented out will not be seen by the computer. Commented-out text generally serves as a note for the user of the script or as a place-holder for an alternative value or variable. 
+
+Below, try commenting-out the phrase you agree less with so it does not appear. Then click "Run Code":
+```{r commenting, exercise=TRUE}
+print("Tyler Kukla is super cool")   # This is a comment -- The "print()" function will print the text inside when this code is run
+print("Tyler Kukla is only sort of cool")  # Here is another comment 
+```
+```{r commenting-hint}
+print("Tyler Kukla is super cool")
+# print("Tyler Kukla is only sort of cool")
+```
+We can also use the **#** to de-select a variable value and replace it with something else.
+
+> Before we do this, let's **define a variable**. We do this with either the equal sign (**=**) or an arrow showing directionality (**<-**). *I prefer the arrow because it is less ambiguous*. After a variable is defined in a script, it will be stored in your environment. 
+
+Here, set the value of the variables. Set **myNumber** to any number and **myName** to a any name (use single or double quotes for text in R):
+```{r myVars, exercise=TRUE}
+myNumber 
+myName
+breakfast(myName=myName, myNumber=myNumber)
+```
+```{r myVars-hint}
+myNumber <- 9999
+myName <- "Tyler Kukla"
+
+```
+
+Now we will show how we can comment-out values to keep in mind for later. Comment out the incorrect value and replace it with the correct one:
+```{r commentOut, exercise=TRUE}
+# There are this many states in the USA
+NumStates <- 324  
+```
+```{r commentOut-solution}
+NumStates <- 50 #324
+```
+
+Great! *You are now the hashtag-comment master!*  **Proceed to the next topic**
+
+## 2. Math
+
+We will graduate from using R as a sophisticated graphing calculator... someday... but until then we must go through the math basics.
+
+This is all very intuitive and simple. 
+
+### Addition
+
+Change the below equation so the sum is 1,000:
+```{r add, exercise=TRUE}
+43 + 567
+```
+
+Now set this solution as a variable
+```{r add2, exercise=TRUE}
+my1000
+add1000(my1000=my1000)
+```
+```{r add2-hint}
+my1000 <- 999 + 1
+```
+
+### Subtraction 
+
+Make an equation that equals -75
+```{r sub, exercise=TRUE}
+50 - 33
+```
+
+
+### Multiplication
+
+We use the star **(asterisk * )** symbol to multiply
+```{r mult, exercise=TRUE}
+#... what is the product of your two favorite numbers???
+FavNum1 
+FavNum2
+FavNum1 * FavNum2
+
+```
+
+### Exponents
+
+There are two ways to take a value to the *nth* power:
+
+1. Use the "carrot" symbol ^
+2. Use the asterisk twice **
+
+```{r pwrX, exercise=TRUE}
+myNum <- 5
+myPower <- 3
+
+myNum ^ myPower     # this is the same as...
+myNum ** myPower    # this.
+```
+
+### Other useful things
+
+Function     | Description
+--------     | --------
+**sqrt(x)**  | square root
+**abs(x)**   | absolute value
+**cos(x)**   | cosine 
+**sin(x)**   | sine
+**tan(x)**   | tangent
+**log(x)**   | natural log
+**log10(x)** | common log
+**exp(x)**   | e^x
+
+
+*You are now a math whiz!! Let's move in!*
+
+## 3. Logical statements
+
+There will be many times when you will need to compare two elements in R and look for similarities/differences or other relationships. We use logical statements to help us do this. Running code with these statements typically returns a **"TRUE"** or **"FALSE"**.
+
+> **Note** both TRUE, FALSE and T, F behave the same way in R 
+
+Here I will cover both relational and logical operators
+
+### Relational Operators
+Operator   | Description   
+---------- | -----------
+**<**      | *less than*
+**>**      | *greater than*
+**<=**     | *less than or equal to*
+**>=**     | *greater than or equal to*
+**==**     | *equal to*
+**!=**     | *not equal to*
+
+Now test out these operators on two numbers that you define!
+```{r relOp, exercise=TRUE}
+num1 <- 77
+num2 <- 79
+#... enter different relational operators below
+num1 < num2
+```
+
+You can also use the *equal to* and *not equal to* operators for characters
+```{r relOp2, exercise=TRUE}
+char1 <- "Apples"
+char2 <- "Oranges"
+#... try out the "==" and "!="
+char1 == char2
+```
+
+### Logical Operators
+Operator   | Description   
+---------- | -----------
+**!**      | *logical NOT*
+**&**      | *element-wise logical AND*
+**&&**     | *logical AND*
+$\mid$     | *element-wise logical OR*
+$\|$       | *logical OR*
+
+> **Note** the element-wise operators are used for a vector and produce results of the vector's length. Non-element wise work for single values or the first value of a vector (for more info on vectors, see Section 5)
+
+Let's test out the logical operators on two numeric values (un-comment the first line to try operators without a check number for comparison):
+```{r logOp, exercise=TRUE}
+num1 <- 5
+num2 <- 0
+CheckNum <- 5
+#... enter different logical operators below
+#num1 != num2
+num1 & num2 == CheckNum
+```
+
+A helpful way to understand operators is to "read" them aloud. For example:
+```{r, eval=FALSE, echo=TRUE}
+#... num1 AND num2 are EQUAL TO CheckNum
+num1 & num2 == CheckNum
+
+#... num1 OR num2 is EQUAL TO CheckNum
+num1 | num2 == CheckNum
+
+#... num1 is NOT EQUAL TO num2
+num1 != num2
+```
+
+
+*You are now logically oriented in R! Let's move on to some functions*
+
+## 4. Functions
+
+It is often useful to take operations that will be repeatedly used in R and turn them into a function. This way we do not re-write the code every time we wish to complete the operation.
+
+Functions can be used for a wide range of tasks, not just mathematical operations. For example, you can build a function to save data that you generate in R, or to create figures or even email yourself automatic updates. Recently, I downloaded ~50 gigabytes of data that all needed to be processed, and I wrote one function that did it all for me in a matter of minutes (rather than processing each file by myself). 
+
+Here we will create some simple functions and discuss their utility. 
+
+### Summation function 
+
+To start, let's make a function that completes some simple addition:
+```{r, eval=FALSE, echo=TRUE}
+mySum <- function(num1, num2){num1 + num2}
+```
+
+```{r prepare-addfun}
+mySum <- function(num1, num2){num1 + num2}
+```
+The function takes in two values **num1 and num2** and produces their sum. Note that we put the variables required for the function in paranthesis and the actual function in curly-brackets.
+
+When we call the function we can use the equal sign to set **num1** and **num2** to whatever values we wish:
+```{r addfun1, exercise=TRUE, exercise.setup="prepare-addfun"}
+mySum(num1 = 50, num2 = 45)
+```
+
+We can also enter defined-variables into a function:
+```{r addfun2, exercise=TRUE, exercise.setup="prepare-addfun"}
+thisNum <- 50
+thatNum <- 45
+mySum(num1 = thisNum, num2 = thatNum)
+```
+
+### Quadratic Formula function
+
+It doesn't save us too much time to have a function that adds two numbers, but let's consider something more complicated like the *quadratic formula*, where we compute both $-b + \sqrt{}$ and $-b - \sqrt{}$:
+```{r, eval=FALSE, echo=TRUE}
+myQuadForm <- function(a, b, c){xMinus <- (-b - sqrt(b**2 - 4*a*c)) / (2*a)
+xPlus <- (-b + sqrt(b**2 - 4*a*c)) / (2*a) 
+
+print(paste("lower solution =", xMinus, "; upper solution =", xPlus, sep=' '))}
+```
+
+```{r prepare-quadfun}
+myQuadForm <- function(a, b, c){xMinus <- (-b - sqrt(b**2 - 4*a*c)) / (2*a)
+xPlus <- (-b + sqrt(b**2 - 4*a*c)) / (2*a) 
+
+print(paste("lower solution =", xMinus, "; upper solution =", xPlus, sep=' '))}
+```
+
+Now testing out our function
+```{r quadfun1, exercise=TRUE, exercise.setup="prepare-quadfun"}
+myQuadForm(a=1, b=5, c=2)
+```
+
+Functions can return values, characters, vectors, plots, dataframes and much more! We will explore some of these throughout the course. Now have a crack at writing your own function. Let's try the equation for a line $y=mx + b$. Let the function return the value $y$ given the variables $m, x, b$. 
+```{r linefun, exercise=TRUE}
+#... define the functijon
+LineFun <- function(){}
+
+#... assign values and run the function
+myY <- LineFun()
+
+#... print the result
+print(myY)
+```
+
+
+*How FUN are these FUNctions?! Now on to Data structures*
+
+## 5. Data structures
+
+There is a wide range of ways to store data in R--from a single-valued variable to *n*-dimensional arrays--and whatever you use will depend on the data you are using, the figures you wish to make, and your personal preferences. 
+
+Here I will go over the basic structures:
+
+1. Vector
+2. Data frame (or matrix)
+3. List
+
+### Vectors
+
+A vector has 1 dimension--length. It can be a sequence of values or characters, and there are functions built into R that help you populate vectors. 
+
+We'll go through three ways to make a vector. *First*, let's build a vector by hand:
+```{r, echo=TRUE}
+myVec <- c(0,1,2,3,4,5,6,7,8,9,10)
+print(myVec)
+```
+As above, any time you assign something with multiple values we must put the values in paranthesis and start with the letter _**c**_. The _**c**_ is short for *concatenate*. 
+
+Here's an example of a vector of character strings:
+```{r, echo=TRUE}
+myCharVec <- c("Tyler K.", "Dan I.", "Page C.")
+print(myCharVec)
+```
+
+**Try making your own vector!**
+```{r makeVec, exercise=TRUE}
+myFirstVector 
+print(myFirstVector)
+```
+```{r makeVec-hint}
+myFirstVector <- c(1, 55, 23, 9)
+```
+
+
+Let's make a vector now using the **sequence function**. The sequence function generates a vector that is a series of numbers based on rules that you define.
+
+For example:
+```{r, echo=TRUE}
+#... a sequence of values from 0 to 10 in steps of 2
+myVec <- seq(from=0, to=10, by=2)
+print(myVec)
+
+#... a sequence of values from 0 to 10 split into 15 segments
+myVec1 <- seq(from=0, to=10, length=15)
+print(myVec1)
+```
+
+**Now build your own sequence vector!**
+```{r seqVec, exercise=TRUE}
+thisVec <- seq()
+print(thisVec)
+```
+
+Another vector-building function is the **repetition function**. This function repeats a single value, character string, or even another vector.
+
+For exmaple:
+```{r, echo=TRUE}
+#... a vector of 42 repeated ten times
+myVec <- rep(x=42, 10)
+print(myVec)
+```
+
+#### Examining vectors
+
+It is often useful to learn about vectors whose contents we may be unfamiliar with. R has a number of functions that do this. 
+
+For example:
+```{r, echo=TRUE}
+thisVec <- seq(33, 133, length=58)
+
+#... and the length
+length(thisVec)
+
+#... what type of vector is this? (what type of data does it hold; double is vector of numbers)
+typeof(thisVec)
+
+#... look at the start of the vector
+head(thisVec)
+
+#... and the end
+tail(thisVec)
+
+#... and the mean
+mean(thisVec)
+```
+
+*Now on to data frames*
+
+### Data frames
+
+This is (likely) the most common data structure you will use. It is a simple matrix with columns and rows. R has a number of datasets that are built in as matrices, but let's first build our own. 
+```{r, echo=TRUE}
+mydf <- matrix(nrow=5, ncol=2, data=c(1:10))
+print(mydf)
+```
+
+We do not need to have data in the matrix when we build it (it may be empty). 
+
+That's a good start, but it's not pretty and there are no column names. Let's use the _**dplyr**_ package to tidy our data up. I particularly like using "tibbles" because they are easy to navigate, process, and graph. 
+```{r, echo=TRUE}
+#..."as_tibble" makes the data structure a tibble
+mydf <- as_tibble(matrix(nrow=5, ncol=2, data=c(1:10)))
+
+#... "colnames" names the columns
+colnames(mydf) <- c('Col1', 'Col2')
+
+#... now let's check it out again
+print(mydf)
+
+#... we can use the "$" symbol to identify different columns
+mydf$Col1
+```
+
+For fun, let's check out a pre-loaded dataset in R. 
+
+One interesting dataset is **mtcars** which is fuel consumption and other data for 32 automobiles published in the *1974 Motor Trend US magazine*. 
+
+```{r, echo=TRUE}
+#... bring data into the environment
+data("mtcars")
+
+#... let's find the dimensions of the data
+dim(mtcars)
+
+#... and the number of rows
+nrow(mtcars)
+
+#... and number of columns
+ncol(mtcars)
+
+#... and miles per gallon
+mtcars$mpg
+```
+
+We can look at different parts of the data by using brackets denoting the row(s) and column(s) we wish to see. 
+```{r, echo=TRUE}
+data("mtcars")
+
+mtcars[1,1]        # row 1 column 1 value
+mtcars[3,5]        # row 3 column 5 value
+mtcars[ ,5]        # all rows of column 5
+mtcars[c(1,2), 6]  # rows 1 and 2 of column 6
+```
+
+
+Now it's your turn! pick a pre-loaded dataset, load it, and explore it a little bit. 
+
+*Some examples are*
+
+1. "iris" measurements of 50 flowers from 3 species of iris
+2. "PlantGrowth" data from experiment of plant biomass under two treatments (and control)
+3. "USArrests" violent crimes in US by state (values per 100,000 people)
+
+```{r playdf, exercise=TRUE, exercise.lines=10}
+data("")
+
+```
+
+
+*Now let's check out some Lists*
+
+### Lists
+
+A list is a set of elements that can vary from one to the other. For example, if you want to place a single value, a vector, and a data frame in the *same location* you could place them in a list. 
+
+For example:
+```{r, echo=TRUE}
+myVar <- "Tyler"
+myVec <- seq(3,30, by=10)
+mydf <- as_tibble(matrix(data=c(1:10), nrow=5, ncol=2))
+
+#... lets bring these into a list
+myList <- list(myVar, myVec, mydf)
+
+#... and let's view the output
+myList
+```
+
+The printed output tells you how to call each element of the list. 
+```{r, echo=TRUE}
+myVar <- "Tyler"
+myVec <- seq(3,30, by=10)
+mydf <- as_tibble(matrix(data=c(1:10), nrow=5, ncol=2))
+myList <- list(myVar, myVec, mydf)
+
+#... to get just the first element
+myList[[1]]
+
+#... combine with dataframe notation to see the second column of the third element
+myList[[3]]$V2
+
+```
+
+*Final quiz* -- can you turn objects or data from a pre-loaded dataset into a list? (remember, some data options are "iris", "USArrests", "PlantGrowth")
+```{r myList, exercise=TRUE, exercise.lines=10}
+data("")
+
+```
+```{r myList-hint}
+data("iris")
+
+object1 <- iris$Species
+object2 <- iris$Sepal.Length[c(1,2)]
+object3 <- c(iris$Petal.Length, iris$Petal.Width)
+
+myList <- list(object1, object2, object3)
+```
+
+*Awesome! Let's move on to "For" loops*
+
+## 6. "For" loops
+
+A "for" loop is a part of a code where you complete some pre-defined computation _**x**_ number of times. For example, if I have a vector of data that includes 55 values, I could use a for-loop to loop through each value and calculate the square of each. 
+```{r, echo=TRUE}
+myVec <- c(10:20)
+
+#... "outVec" is the solution of the computation
+#... "length(myVec)" equals the number of times we loop through
+#... "i" counts where we are in the loop
+
+outVec <- vector()    # an empty vector
+
+for(i in 1:length(myVec)){
+  outVec[i] <- sqrt(myVec[i])
+}
+
+#... see the results
+print(outVec)
+```
+
+For this particular problem, we would usually just code: outVec <- sqrt(myVec)
+This would accomplish the same thing. But this example is useful to understand how for-loops work. 
+
+We can also **nest** a for loop within another one. This is useful if we have 2-dimensional data (like a dataframe).
+```{r, echo=TRUE}
+mydf <- mydf <- as_tibble(matrix(data=c(1:10), nrow=5, ncol=2))
+
+# Here, we loop through all columns (i) and all rows (k). 
+# I want to save data in a vector, so I need a unique value to 
+# track what iteration we're on. We'll call the tracker "dex" 
+# (short for "index")
+
+outVec <- vector()    # empty vector to hold output
+dex <- 1              # tracker to store data in vector
+
+for(i in 1:ncol(mydf)){   # loop through each column
+  for(k in 1:nrow(mydf)){ # loop through each row
+    outVec[dex] <- mydf[k, i] ** 2     # square the value
+    
+    #... set the tracker to the next number
+    dex <- dex + 1
+  }
+}
+
+#... check out the results
+outVec
+```
+
+*Use the space below to write your own for loop*. Multiply the miles-per-gallon of the "mtcars" data by the horsepower, and save in a vector. 
+```{r forLoop, exercise=TRUE}
+data("mtcars")
+
+mtcars$mpg   # miles-per-gallon data
+mtcars$hp    # horsepower data 
+
+outVec <- vector()
+for(i in 1:length(mtcars$mpg)){
+  
+}
+```
+```{r forLoop-solution}
+data("mtcars")
+
+outVec <- vector()
+for(i in 1:length(mtcars$mpg)){
+  outVec[i] <- mtcars$mpg[i] * mtcars$hp[i]
+}
+
+```
+
+
+*Great! We can now bring the data structures and for loops together to work on data visualization*
+
+## 7. Data visualization
+
+There is *SO MUCH* to learn with data visualization (you could do an entire PhD on it, and people do). Here, I will just cover the very basics. 
+
+R is a powerful data visualization tool, with many plotting commands that are useful in "base R" (the functions that come built-in). *However*, R has a much more powerful and easy-to-use plotting tool called **"ggplot"**. This is a set of plotting commands that follow simple, organized data structures and allow for easily-customizable visualizations. 
+
+*Some ggplot2 specifics*:
+
+Each element of a plot is generally its own line in the script. Each line ends with a **"+"**, indicating there is another line after it (the last line does not end with a plus). We first tell ggplot what data we are using:
+```{r, echo=TRUE, eval=FALSE}
+data("mtcars")
+
+ggplot(mtcars) +
+```
+
+Now we tell ggplot what kind of plot to make. These usually start with **"geom_"**, denoting the plot's "geometry". For a scatterplot, we use "geom_point". 
+```{r, echo=TRUE, eval=FALSE}
+ggplot(mtcars) + 
+  geom_point()
+```
+
+Next we determine the plot's _**aesthetics**_ with the **aes()** command. Within this command we tell ggplot what to put on the X and Y axes:
+```{r, echo=TRUE, eval=FALSE}
+ggplot(mtcars) + 
+  geom_point(aes(x = wt, y = mpg))
+```
+Notice that the x and y values are just the names of the columns of data we wish to plot. Here we investigate how miles-per-gallon (mpg) relates to the weight (wt) of a car.
+
+
+Now let's look at (and make) some figures!
+**There are loads of amazing examples online. Here I will just cover a couple.** 
+
+1. Scatterplot
+2. Density plot
+3. Box and whisker or "violin"
+
+### Scatterplot
+
+Starting with the classic scatterplot -- what does X vs Y look like?
+
+Let's take a look at the "mtcars" dataset
+```{r, echo=TRUE, eval=TRUE}
+data("mtcars")
+
+ggplot(mtcars) + 
+  geom_point(aes(x=wt, y=mpg)) +
+  theme_linedraw()    
+
+# there are many "themes" you can choose from (or you can avoid them all together). This is one that I like. 
+
+```
+
+We can also add color to the data points, and change their size and shape. These steps involve those words exactly **("color", "size", and "shape")**. When looking for a nice color palette, I suggest checking out [Adobe color wheel](https://color.adobe.com/create/color-wheel/). *Especially the pre-defined themes under __Explore__*. You can simply copy and paste the HEX code of the color you want, then call that color by putting quotes around the code and a hashtag in front. *For example: "#FA7268"*.
+
+```{r, echo=TRUE, eval=TRUE}
+data("mtcars")
+
+ggplot(mtcars) + 
+  geom_point(aes(x=wt, y=mpg), color='#FA7268', shape=15, size=4) +
+  theme_linedraw()    
+
+# google "ggplot2 shapes R" to see what shape corresponds to what code
+```
+
+We can also change the axis labels *(labs)*, add a title *(ggtitle)*, make the points semi-transparent *(alpha)*, and color them by a different parameter. 
+
+To color points by another parameter, the "color" value must be in the aesthetic **aes()**. Then we can define the color with a variety of **"scale_color_"** commands. For example:
+```{r, echo=TRUE, eval=TRUE}
+data("mtcars")
+
+ggplot(mtcars) + 
+  #... the data
+  geom_point(aes(x=wt, y=mpg, color=qsec), shape=16, size=4, alpha=0.7) +
+  #... the color gradient
+  scale_color_gradient(name="Quarter mile time", low="#C5003E", high="#D9FF5B") +
+  #... axis labels
+  labs(x="Weight (x1e3 pounds)", y="Miles per gallon") +
+  ggtitle("Fuel Efficiency") +
+  theme_linedraw()    
+
+```
+
+**Your turn!** Make your own plot or copy and paste the code above to modify mine:
+```{r scatterplot, exercise=TRUE, exercise.lines=12}
+data("mtcars") 
+
+ggplot(mtcars) +
+  geom_point()
+
+```
+
+
+### Density plot
+
+We can use the same basic structure in ggplot that we learned in the scatter plot example to make a density plot. 
+
+Let's look at a density plot for horsepower in the mtcars data:
+```{r, echo=TRUE, eval=TRUE}
+data("mtcars")
+
+ggplot(mtcars) + 
+  geom_density(aes(x=hp), fill="#C5003E", alpha=0.6) +
+  labs(x="Horsepower") +
+  ggtitle("Horsepower density plot") +
+  theme_linedraw()
+```
+
+As you can see, it's almost exactly the same as the scatter plot figure but **geom_point()** is replaced with **geom_density** and there is no y-axis defined for the density plot. 
+
+We can make a **2-D density** plot in which case the Y axis must be defined:
+```{r, echo=TRUE, eval=TRUE}
+data("mtcars")
+
+ggplot(mtcars) + 
+  #... density plot
+  stat_density2d(aes(x=hp, y=wt, fill=..level..), geom='polygon') +
+  #... plus data
+  geom_point(aes(x=hp, y=wt), color="gray") +
+  labs(x="Horsepower", y="Weight") +
+  ggtitle("Horsepower vs Weight 2D density plot") +
+  theme_linedraw()
+```
+
+*Feel free to make your own density plot here!*
+```{r densityplot, exercise=TRUE, exercise.lines=12}
+data("mtcars") 
+
+ggplot(mtcars) 
+
+```
+
+### Box and whisker or "violin"
+
+Box and whisker plots are useful for statistical visualization of groups of data. The same data can be represented by density in "violin" plots as well. Both of these are easy in ggplot and we will walk through them here. 
+
+Box and whisker example (using scale_fill_ instead of scale_color_ because color controls the outline):
+```{r, echo=TRUE, eval=TRUE}
+data("mtcars")
+
+ggplot(mtcars) + 
+  geom_boxplot(aes(x=as.character(am), y=mpg, fill=as.character(am))) +
+  scale_fill_manual(name="Transmission", label=c("0"="Automatic", "1"="Manual"), 
+                     values=c("0"="#348899", "1"="#962D3E")) +
+  ggtitle("Miles per gallon by transmission") +
+  labs(x="Transmission (0=auto; 1=man)", y="Miles per gallon") +
+  theme_linedraw()
+  
+```
+
+And almost the exact same code works for a violin plot (**geom_violin** instead of geom_boxplot):
+```{r, echo=TRUE, eval=TRUE}
+data("mtcars")
+
+ggplot(mtcars) + 
+  geom_violin(aes(x=as.character(am), y=mpg, fill=as.character(am))) +
+  scale_fill_manual(name="Transmission", label=c("0"="Automatic", "1"="Manual"), 
+                     values=c("0"="#348899", "1"="#962D3E")) +
+  ggtitle("Miles per gallon by transmission") +
+  labs(x="Transmission (0=auto; 1=man)", y="Miles per gallon") +
+  theme_linedraw()
+
+```
+
+*Now try your own box plot!*
+```{r boxplot, exercise=TRUE, exercise.lines=12}
+data("mtcars")
+
+ggplot(mtcars)
+
+```
+
