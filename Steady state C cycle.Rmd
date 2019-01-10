@@ -1,0 +1,584 @@
+---
+title: "The steady state Carbon cycle"
+author: "Tyler Kukla"
+date: "1/8/19"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(dplyr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Introduction
+
+A first step to building box models of isotopic exchange reactions is understanding the "steady state". We refer to a steady state system as one whose fluxes in are equal to its fluxes out, thus the mass of the reservoir does not change with time. On geologic timescales (> 1 million years), it is reasonable to model the carbon cycle in the steady state. Here, we will derive such a model, examine the assumptions that go into it, and quantify errors associated with one key assumption. 
+
+*If you have any questions or comments on the tutorial please feel free to email me at tykukla@stanford.edu*
+
+This tutorial is inspired by the exercises in "**An Introduction to Isotopic Calculations**" by *John Hayes* (Sept. 30, 2004). Here we will apply the general framework of equations for a reversible reaction in a closed system to the geologic carbon cycle and its isotope mass balance. 
+
+A reversible reaction--perhaps intuitively--is one characterized by the forward and reverse exchange between two substances. For the purpose of this exercise, we will examine the reversible reaction characterized by *photosynthesis* and *respiration*. The former is the uptake of $CO_2$ resulting in the production of oxygen, while the latter is the reverse. In a simplified form this looks like:
+
+$$ CO_2 + H_2O \rightleftharpoons CH_2O + O_2 $$
+where photosynthesis is forward, respiration reverse, and $CH_2O$ is a simplified formula for organic Carbon.
+
+In the following, we will derive the basic mass balance formulas with their isotopic signatures, and consider the implications of this mass balance for the carbon isotopic composition of the mantle (which, via subduction, is similar to the weighted average composition of carbonate (respiration product) and organic carbon (photosynthesis product)). 
+
+## Mathematical derivation
+
+We start with the basic assumption that the isotopic composition of the mantle ($\delta_{mantle}$) is equal to the weighted average isotopic composition of buried carbonate ($\delta_{carb}$) and organic carbon ($\delta_{org}$):
+
+$$\delta_{mantle} = f_{org}*\delta_{org} + (1-f_{org})*\delta_{carb}$$
+where $f_{org}$ is the fraction of buried carbon that is organic carbon.
+
+In order to relate the isotopic composition of carbonate to that of organic carbon, we can define a fractionation factor $\alpha$ for the photosynthetic reaction (carbonate to organic carbon):
+
+$$\alpha_{carb/org} = \left(\frac{\delta_{carb} + 1}{\delta_{org} + 1}\right)$$
+
+From here, we can rearrange to solve for the isotopic composition of organic carbon:
+
+$$ \delta_{org} = \frac{\delta_{carb} + 1 - \alpha}{\alpha} $$
+or
+$$\delta_{org} = \frac{\delta_{carb} - (\alpha - 1)}{\alpha} $$
+The term $\alpha - 1$ can be re-written with simpler notation as epsilon ($\epsilon$). 
+
+Now, using the epsilon term and plugging the above equation into the weighted mean, we get:
+
+$$ \delta_{mantle} = f_{org}\left(\frac{\delta_{carb} - \epsilon}{\alpha} \right) + (1-f_{org})\delta_{carb} $$
+
+We now have the isotopic composition of the mantle written as a function of that of carbonate and its burial fraction (removing $\delta_{org}$ from the equation). If we rearrange this equation to solve for the isotopic composition of carbonate, we get:
+
+$$ \delta_{carb} = \frac{\alpha \space \delta_{mantle} + f_{org} \space \epsilon}{\alpha(1-f_{org}) + f_{org}} $$
+This equation represents the isotopic composition of carbonate rock as a function of that of the mantle and the fraction of organic carbon buried. In the steady state, this implies that the isotopic compoisition of carbonate depends on mantle degassing (*ie* volcanism) and the balance between organic and carbonate burial. 
+
+It is common to take this equation a step further, employing an assumption that only holds for reactions whose isotopic fractionation is relatively small. This assumption is that the fractionation factor $alpha$ is approximately 1. For this carbon isotope case, the assumption is not bad. If we take modern values for $\delta_{carb}$ and $\delta_{org}$ of $0$ and $-30$ per mille respectively, then $\alpha$ becomes:
+
+$$ \alpha = \frac{\delta_{carb} + 1}{\delta_{org} + 1} = \frac{0.00 + 1}{-0.030 + 1} = 1.031 $$
+(*Note: $\delta$ notation is in units of parts per thousand (per mille), which is how we go from -30 to -0.030*).
+
+Applying this assumption we arrive at the canonical "lever rule", first defined by--to the best of my knowledge--Dick Holland in 1984: 
+
+$$ \delta_{carb} = f_{org}\space\epsilon \space + \space \delta_{mantle} $$
+The epsilon term $\epsilon$ is commonly written in capital delta notation ($\Delta C^{13}_{carb-org}$) in lever rule calculations. 
+
+Now that we have derived these equations, we can use our model to examine the steady state mass balance of the Carbon cycle and its isotopic signatures. 
+
+## Coding up the model
+
+### Introduction
+
+Here, we will examine the results from both models of the isotopic composition of carbonate presented in the last section. The first is more accurate mass balance formulation: 
+
+$$ \delta_{carb} = \frac{\alpha \space \delta_{mantle} + f_{org} \space \epsilon}{\alpha(1-f_{org}) + f_{org}} $$
+
+And the second leverages the approximation $\alpha \approx 1$, giving us:
+
+$$ \delta_{carb} = f_{org}\space\epsilon \space + \space \delta_{mantle} $$
+
+You will now code up both models in R, and use a guiding template to plot their output. 
+
+### Writing model functions
+
+We'll start by coding up the more accurate mass balance model (first equation in this topic section). But before we get there, we need to have a conversation about units. We want our models to return a solution __*in per mille*__ values, meaning the raw value is multiplied by 1000. But we must keep in mind that the fractionation factor (alpha; $\alpha$) *is calculated with the isotopic compositions per 1*. 
+
+Given that today, $\delta_{carb}$ is zero per mille and $\delta_{org}$ is negative thirty per mille, calculate the fractionation factor $\alpha$. 
+
+```{r alphaCalc, exercise=TRUE}
+#... Recall:
+# Alpha = (isotopic composition carb + 1) / (isotopic composition org + 1)
+
+myAlpha
+
+print(myAlpha)
+
+```
+```{r alphaCalc-solution}
+
+myAlpha <- ( (0/1000) + 1 ) / ( (-30/1000) + 1 )
+
+```
+
+Did you get a number close to $1.0309$? If so, congrats! You have calculated the correct alpha value and are ready to move on. 
+
+Now, recall that epsilon ($\epsilon$) is **NOT dimensionless** like alpha ($\alpha$) is. Therefore, when we convert from alpha to epsilon, we must make sure to get the epsilon value in per mille.
+
+Given that epsilon is defined as $\alpha - 1$, what is the value of epsilon __*in per mille*__?
+```{r epsCalc, exercise=TRUE}
+myAlpha <- 1.030928
+
+myEps
+
+print(myEps)
+
+```
+```{r epsCalc-solution}
+myAlpha <- 1.030928
+
+myEps <- (myAlpha - 1) * 1000
+```
+
+**Did you find that epsilon is 30.928?** If so, you are correct--great work! 
+
+Now that we have our parameters in the correct units we can write the functions. Please write it so that it reads in values for alpha ($\alpha$), the isotopic composition of the mantle ($\delta_{mantle}$), and the fraction of buried carbon that is organic ($f_{org}$). 
+
+> Simplify the function for the user by replacing epsilon ($\epsilon$) with its definition: $\alpha - 1$ and convert to per mille as we did above.
+
+After you define the function, run it to make sure it is working. Use the following values: 
+
+1. alpha (alf) = 1.030928
+2. mantle isotopic composition (dmantle) = -6 
+3. fraction of buried organic carbon (forg) = 0.2
+
+*NOTE: Check your units! Make sure your alpha-notation of epsilon is __in per mille__!*
+
+```{r modAcc, exercise=TRUE}
+#... To maintain consistency between this exercise and the next, 
+#    please use the function and variable names that I provide.
+
+# [1] Fractionation factor alpha -- alf
+# [2] Isotopic composition of mantle -- dmantle
+# [3] Organic fraction of buried carbon -- forg
+
+Ccycle_accurate <- function(alf, dmantle, forg){}
+
+#... now define the input values and run the model
+my_d13Ccarb <- Ccycle_accurate()
+
+print(my_d13Ccarb)
+
+```
+```{r modAcc-solution}
+Ccycle_accurate <- function(alf, dmantle, forg){
+  num <- (alf * dmantle) + (forg * (alf-1)*1000)   # numerator in model equation
+  denom <- alf * (1 - forg) + forg                 # denominator in model equation
+  
+  #... solve the isotopic composition of carbonate
+  d13carb <- num / denom
+  
+  #... return the result
+  return(d13carb)
+}
+```
+
+**Was your number very close to zero??** If so, you succeeded! The isotopic composition of carbonate rock is zero per mille by definition. 
+
+Now, let's do the same but for the less accurate carbon mass balance model (where we assume alpha ($\alpha$) is equal to 1). This should be much easier, especially now that we have defined epsilon above ($\epsilon = 30.928$).
+
+Here, define the approximated carbon model so the function reads in the isotopic composition of the mantle ($\delta_{mantle}$), the fraction of buried carbon that is organic ($f_{org}$), and epsilon ($\epsilon$). As above, the function should return the isotopic composition of carbonate. 
+
+After you define the function, run it to make sure it is working. Use the following values: 
+
+1. epsilon (eps) = 30.928
+2. mantle isotopic composition (dmantle) = -6 
+3. fraction of buried organic carbon (forg) = 0.2
+
+```{r modApprox, exercise=TRUE}
+#... To maintain consistency between this exercise and the next, 
+#    please use the function and variable names that I provide.
+
+# [1] Fractionation term epsilon -- eps
+# [2] Isotopic composition of mantle -- dmantle
+# [3] Organic fraction of buried carbon -- forg
+
+Ccycle_approx <- function(eps, dmantle, forg){}
+
+#... now define the input values and run the model
+my_d13Ccarb <- Ccycle_approx()
+
+print(my_d13Ccarb)
+```
+```{r modApprox-solution}
+Ccycle_approx <- function(eps, dmantle, forg){
+  d13C <- dmantle + forg*eps
+  
+  #... return  the value
+  return(d13C)
+}
+```
+
+**Did you get a number slightly greater than zero? (about 0.18?)** If so, congrats! You did it!
+
+**_Quick note_** -- For this exercise, we will generally want to hold the carbonate-organic fractionation ($\epsilon$ and $\alpha$) and the isotopic composition of the mantle ($\delta_{mantle}$) constant. 
+
+It is a pain to have to define it every time, but we also want the option to define it. *Thankfully*, R will help us with this! If you have a **default value** for a variable in a function, you can set that when you define the function. Then you don't have to define it when you run the function. 
+
+**For example**
+```{r, echo=TRUE, eval=TRUE}
+#... NOTE how eps and dmantle are defined in the function line -- 
+
+Ccycle_approx <- function(eps=30.928, dmantle=-6, forg){
+  d13C <- dmantle + forg*eps
+  
+  #... return  the value
+  return(d13C)
+}
+
+d13C_forg20 <- Ccycle_approx(forg=0.2)
+
+print(paste("When 20 percent of buried carbon is organic, the isotopic composition of carbonate will be", d13C_forg20, sep=' '))
+```
+
+
+*Great work! You are now ready to work with the models directly!*
+
+## Model analysis
+
+In this module we will run both models by examining the isotopic composition of carbonate rock as a function of the fraction of organic carbon that is buried. 
+
+**First** it is important to understand the basic model assumptions. We will hold two variables constant in these calculations: 
+
+1. The fractionation between carbonate and organic carbon
+2. The isotopic composition of the mantle
+
+Therefore, one way to conceptualize our results is: given a constant fractionation between organic and carbonate carbon, and a known (prescribed) fraction of organic carbon buried, what is the isotopic composition of carbonate required to keep the mantle at its known composition of -6 per mille? 
+
+Here, I have written template scripts that include the models we previously built. Your task is to feed the model a **_vector_** of $f_{org}$ values (fraction of buried carbon that is organic) to calculate the isotopic composition of carbonate. The script will then plot the result.
+
+Because $f_{org}$ is a fraction, please run the model with values ranging from 0 to 1.
+
+We will start with the more accurate of the two mass balance models. Your output will be the isotopic composition of carbonate rock (**dark blue**). I have also derived the model for that of organic matter and will plot that for you as well (**green**). I will also include the mantle isotopic composition for reference, but you must define it. 
+```{r prepare-runAcc}
+Ccycle_accurate <- function(alf, dmantle, forg){
+  num <- (alf * dmantle) + (forg * (alf-1)*1000)   # numerator in model equation
+  denom <- alf * (1 - forg) + forg                 # denominator in model equation
+  
+  #... solve the isotopic composition of carbonate
+  d13carb <- num / denom
+  
+  #... return the result
+  return(d13carb)
+}
+
+Ccycle_accurate_organic <- function(alf, dmantle, forg){
+  num <- dmantle - (1-forg) * (alf-1)*1000
+  denom <- alf*(1-forg) + forg
+  
+  d13org <- num / denom
+  
+  return(d13org)
+}
+```
+```{r prepare-runApprox}
+Ccycle_approx <- function(eps, dmantle, forg){
+  d13C <- dmantle + forg*eps
+  
+  #... return  the value
+  return(d13C)
+}
+
+Ccycle_approx_organic <- function(eps, dmantle, forg){
+  dmantle - (1-forg)*eps
+}
+```
+```{r runAcc, exercise=TRUE}
+#... define dmantle and alf
+mydmantle <- -6
+myalf <- 1.030928
+
+#... start by defining the forg vector (try the "seq" function)
+
+forg_vec
+
+#... now run the model (fill in forg value)
+d13C <- Ccycle_accurate(alf=myalf, dmantle=mydmantle, forg = )
+
+#... and get the organic value 
+d13Corg <- Ccycle_accurate_organic(alf=myalf, dmantle=mydmantle, forg=forg_vec)
+d13mantle <- rep(mydmantle, length(forg_vec))
+
+#... bring output into a dataframe
+df <- as_tibble(cbind(d13C, d13Corg, d13mantle, forg_vec)) 
+colnames(df) <- c('d13C', 'd13Corg', 'd13mantle', 'forg')
+
+ggplot(df) + 
+  geom_line(aes(x=forg, y=d13C, color="Carbonate carbon"), size=2) +
+  geom_line(aes(x=forg, y=d13Corg, color="Organic carbon"), size=2) +
+  geom_line(aes(x=forg, y=d13mantle, color="Mantle carbon"), linetype='dashed') +
+  scale_color_manual(name=NULL, values=c("Carbonate carbon" = '#10222B', "Organic carbon"='#95AB63', 
+                                         "Mantle carbon"='darkgray')) +
+  labs(x='Fraction organic', y=expression('δ'^{13}*'C')) +
+  theme_linedraw()
+```
+```{r runAcc-hint}
+#... use the sequence function (seq) to set the forg_vec
+forg_vec <- seq(0,1, length=100)
+
+#... then set forg = forg_vec in the Ccycle_accurate function
+```
+
+Awesome! If you successfully made the plot and had fun, feel free to try out what happens with different values of alpha ($\alpha$) and or the isotopic composition of the mantle ($\delta_{mantle}$)! Otherwise, proceed to the next step. 
+
+Now let's do the same for the less accurate model where we assume that alpha ($\alpha$) equals 1. 
+```{r runApprox, exercise=TRUE}
+#... define dmantle and alf
+mydmantle <- -6
+myeps <- 30.928
+
+#... start by defining the forg vector (try the "seq" function)
+
+forg_vec
+
+#... now run the model (fill in forg value)
+d13C <- Ccycle_approx(eps=myeps, dmantle=mydmantle, forg = )
+
+#... and get the organic value 
+d13Corg <- Ccycle_approx_organic(eps=myeps, dmantle=mydmantle, forg=forg_vec)
+d13mantle <- rep(mydmantle, length(forg_vec))
+
+#... bring output into a dataframe
+df <- as_tibble(cbind(d13C, d13Corg, d13mantle, forg_vec)) 
+colnames(df) <- c('d13C', 'd13Corg', 'd13mantle', 'forg')
+
+ggplot(df) + 
+  geom_line(aes(x=forg, y=d13C, color="Carbonate carbon"), size=2) +
+  geom_line(aes(x=forg, y=d13Corg, color="Organic carbon"), size=2) +
+  geom_line(aes(x=forg, y=d13mantle, color="Mantle carbon"), linetype='dashed') +
+  scale_color_manual(name=NULL, values=c("Carbonate carbon" = '#10222B', "Organic carbon"='#95AB63', 
+                                         "Mantle carbon"='darkgray')) +
+  labs(x='Fraction organic', y=expression('δ'^{13}*'C')) +
+  theme_linedraw()
+```
+
+
+**WELL** that looks almost *EXACTLY* like the more accurate model, huh! We will explore the differences in the next section. 
+But first, *if you want to try making your own plots* here is some blank space where you can copy and paste any above code and practice:
+```{r practiceplot, exercise=TRUE, exercise.lines=10}
+
+```
+
+
+## Evaluating approximation error
+
+The less accurate model requires the approximation that the fractionation factor, alpha ($\alpha$), equals 1. If you completed the last section, you know that this appears to be a good assumption for the carbon cycle model. 
+
+Here, let's evaluate just *how good* that assumption is, and test the conditions under which the assumption starts to fail. 
+```{r prepare-ErrAnal}
+ErrorCalculator <- function(alf, dmantle, forg){
+  # define epsilon
+  eps <- (alf-1)*1e3
+  
+  # ----- ACCURATE
+  # carb
+  num <- (alf * dmantle) + (forg * (alf-1)*1000)   # numerator in model equation
+  denom <- alf * (1 - forg) + forg                 # denominator in model equation
+  d13carb <- num / denom
+  
+  # org
+  num <- dmantle - (1-forg) * (alf-1)*1000
+  denom <- alf*(1-forg) + forg
+  d13org <- num / denom
+  
+  # ----- APPROXIMATE
+  # carb
+  d13CcarbApprox <- dmantle + forg*eps
+  
+  # org
+  d13CorgApprox <- dmantle - (1-forg)*eps
+  
+  # ---- bring it together
+  mantle <- rep(dmantle, length(forg))
+  outdf <- as_tibble(cbind(d13carb, d13org, d13CcarbApprox, d13CorgApprox, mantle, forg))
+  colnames(outdf) <- c('dcarb', 'dorg', 'dcarbApprox', 'dorgApprox', 'mantle', 'forg')
+  
+  # ---- CALCULATE RESIDS
+  dcarbResid <- d13CcarbApprox - d13carb
+  dorgResid <- d13CorgApprox - d13org
+  
+  outdf$CarbResid <- dcarbResid
+  outdf$OrgResid <- dorgResid
+  
+  # return output
+  return(outdf)
+}
+```
+
+I've written a function called "ErrorCalculator" that calculates the difference between the accurate and approximated mass balance solutions. 
+
+I'll start off by feeding the function the default values of alpha ($\alpha$), dmantle ($\delta_{mantle}$), and forg ($f_{org}$) to see what the error is for the carbon system in using the $\alpha=1$ approximation.
+```{r, echo=TRUE, eval=FALSE}
+#... define the input values
+alf_in <- 1.030928
+dmantle_in <- -6
+forg_in <- seq(0,1, length=100)
+
+df <- ErrorCalculator(alf=alf_in, dmantle=dmantle_in, forg=forg_in)
+```
+```{r, echo=FALSE, eval=TRUE}
+
+
+alf_in <- 1.030928
+dmantle_in <- -6
+forg_in <- seq(0,1, length=100)
+
+df <- ErrorCalculator(alf=alf_in, dmantle=dmantle_in, forg=forg_in)
+
+ggplot(df) + 
+  # carbonate
+  geom_line(aes(x=forg, y=dcarb, color="Carbonate carbon", linetype="Accurate")) +
+  geom_line(aes(x=forg, y=dcarbApprox, color="Carbonate carbon", linetype="Approximation")) +
+  # organic
+  geom_line(aes(x=forg, y=dorg, color="Organic carbon", linetype="Accurate")) +
+  geom_line(aes(x=forg, y=dorgApprox, color="Organic carbon", linetype="Approximation")) +
+  # mantle
+  geom_line(aes(x=forg, y=mantle, color="Mantle carbon"), linetype='dotted') +
+  # define colors
+  scale_color_manual(name=NULL, values=c("Carbonate carbon" = '#10222B', "Organic carbon"='#95AB63', 
+                                         "Mantle carbon"='darkgray')) +
+  # define linetypes
+  scale_linetype_manual(name=NULL, values=c("Accurate"="solid", "Approximation"="dashed")) +
+  labs(x='Fraction organic', y=expression('δ'^{13}*'C')) +
+  theme_linedraw()
+
+# Residuals (approx - accurate)
+ggplot(df) + 
+  geom_line(aes(x=forg, y=CarbResid, color="Carbonate carbon")) + 
+  geom_line(aes(x=forg, y=OrgResid, color="Organic carbon")) +
+  geom_line(aes(x=forg, y=mantle-mantle, color="Mantle carbon"), linetype='dotted') + 
+  scale_color_manual(name=NULL, values=c("Carbonate carbon" = '#10222B', "Organic carbon"='#95AB63', 
+                                         "Mantle carbon"='darkgray')) +
+  labs(x='Fraction organic', y=expression('δ'^{13}*'C Error')) +
+  theme_linedraw()
+
+```
+
+> **WOW!**
+
+Even though $\alpha=1$ seemed like a good assumption in the Model derivaion section, we see that the error between the two calculations (Carbonate vs Organic) spans a range of **more than 1 per mille!** This is significantly greater than the analytical error on isotopic measurements. 
+
+Before the seminal paper by Kump and Arthur, which proposed a time-dependent and significantly more complex model of this system, numerous papers used the **_approximated_** lever rule model to infer changes in carbon burial from carbon isotope excursions in carbonate of 2 per mille or less! This means that the error on their model predictions could have been greater than 10% of their data's signal (if the approximated model was used). 
+
+Even in the carbon isotope system the accurate model is significantly more useful than the approximated one. 
+
+Now it's your turn! Play around with the parameters of the models and see what leads to larger or smaller errors. 
+```{r ErrAnal, exercise=TRUE}
+#... define the input values
+alf_in <- 1.030928
+dmantle_in <- -6
+forg_in <- seq(0,1, length=100)
+
+df <- ErrorCalculator(alf=alf_in, dmantle=dmantle_in, forg=forg_in)
+
+# plot the results
+#... absolute isotope values
+ggplot(df) + 
+  # carbonate
+  geom_line(aes(x=forg, y=dcarb, color="Carbonate carbon", linetype="Accurate")) +
+  geom_line(aes(x=forg, y=dcarbApprox, color="Carbonate carbon", linetype="Approximation")) +
+  # organic
+  geom_line(aes(x=forg, y=dorg, color="Organic carbon", linetype="Accurate")) +
+  geom_line(aes(x=forg, y=dorgApprox, color="Organic carbon", linetype="Approximation")) +
+  # mantle
+  geom_line(aes(x=forg, y=mantle, color="Mantle carbon"), linetype='dotted') +
+  # define colors
+  scale_color_manual(name=NULL, values=c("Carbonate carbon" = '#10222B', "Organic carbon"='#95AB63', 
+                                         "Mantle carbon"='darkgray')) +
+  # define linetypes
+  scale_linetype_manual(name=NULL, values=c("Accurate"="solid", "Approximation"="dashed")) +
+  labs(x='Fraction organic', y=expression('δ'^{13}*'C')) +
+  theme_linedraw()
+
+# Residuals (approx - accurate)
+ggplot(df) + 
+  geom_line(aes(x=forg, y=CarbResid, color="Carbonate carbon")) + 
+  geom_line(aes(x=forg, y=OrgResid, color="Organic carbon")) +
+  geom_line(aes(x=forg, y=mantle-mantle, color="Mantle carbon"), linetype='dotted') + 
+  scale_color_manual(name=NULL, values=c("Carbonate carbon" = '#10222B', "Organic carbon"='#95AB63', 
+                                         "Mantle carbon"='darkgray')) +
+  labs(x='Fraction organic', y=expression('δ'^{13}*'C Error')) +
+  theme_linedraw()
+```
+
+What do you notice? Is the error in the approximated model sensitive to the isotopic fractionation factor? How about the isotopic composition of the mantle?
+
+It makes sense that changing the fractionation factor also changes the error. The model error is based on the assumption that the fractionation factor is equal to one. *But why is the error dependent on the initial isotopic composition of the mantle?* \space In the accurate mass balance model, the isotopic composition of the mantle is multipled by the fractionation factor in the numerator ($\alpha * \delta_{mantle}$). So the larger the absolute $\delta_{mantle}$ \space value, the more pronounced the error becomes. 
+
+As stated previously, the same framework can be generalized for any closed system. Let's look at a final case where this error becomes quite extreme: **_Hydrogen isotopes during the evaporation of water._**
+
+Here, I have re-written the code to match typical values for evaporation of water from a pool at about **14 degrees celsius** (roughly the global mean temperature), with an **initial water composition of -80 per mille** (roughly global mean rainwater value).
+```{r prepare-ErrAnal2}
+ErrorCalculator <- function(alf, dmantle, forg){
+  # define epsilon
+  eps <- (alf-1)*1e3
+  
+  # ----- ACCURATE
+  # carb
+  num <- (alf * dmantle) + (forg * (alf-1)*1000)   # numerator in model equation
+  denom <- alf * (1 - forg) + forg                 # denominator in model equation
+  d13carb <- num / denom
+  
+  # org
+  num <- dmantle - (1-forg) * (alf-1)*1000
+  denom <- alf*(1-forg) + forg
+  d13org <- num / denom
+  
+  # ----- APPROXIMATE
+  # carb
+  d13CcarbApprox <- dmantle + forg*eps
+  
+  # org
+  d13CorgApprox <- dmantle - (1-forg)*eps
+  
+  # ---- bring it together
+  mantle <- rep(dmantle, length(forg))
+  outdf <- as_tibble(cbind(d13carb, d13org, d13CcarbApprox, d13CorgApprox, mantle, forg))
+  colnames(outdf) <- c('dcarb', 'dorg', 'dcarbApprox', 'dorgApprox', 'mantle', 'forg')
+  
+  # ---- CALCULATE RESIDS
+  dcarbResid <- d13CcarbApprox - d13carb
+  dorgResid <- d13CorgApprox - d13org
+  
+  outdf$CarbResid <- dcarbResid
+  outdf$OrgResid <- dorgResid
+  
+  # return output
+  return(outdf)
+}
+```
+```{r ErrAnal2, exercise=TRUE}
+#... define the input values
+alf_in <- 1.09
+dpool_in <- -80
+fevap_in <- seq(0,1, length=100)
+
+df <- ErrorCalculator(alf=alf_in, dmantle=dpool_in, forg=fevap_in)
+
+# plot the results
+#... absolute isotope values
+ggplot(df) + 
+  # Pool water
+  geom_line(aes(x=forg, y=dcarb, color="Pool water", linetype="Accurate")) +
+  geom_line(aes(x=forg, y=dcarbApprox, color="Pool water", linetype="Approximation")) +
+  # evaporated water
+  geom_line(aes(x=forg, y=dorg, color="Evaporated vapor", linetype="Accurate")) +
+  geom_line(aes(x=forg, y=dorgApprox, color="Evaporated vapor", linetype="Approximation")) +
+  # mantle
+  geom_line(aes(x=forg, y=mantle, color="Initial pool value"), linetype='dotted') +
+  # define colors
+  scale_color_manual(name=NULL, values=c("Pool water" = '#10222B', "Evaporated vapor"='#95AB63', 
+                                         "Initial pool value"='darkgray')) +
+  # define linetypes
+  scale_linetype_manual(name=NULL, values=c("Accurate"="solid", "Approximation"="dashed")) +
+  labs(x='Fraction evaporated', y=expression('δD')) +
+  theme_linedraw()
+
+# Residuals (approx - accurate)
+ggplot(df) + 
+  geom_line(aes(x=forg, y=CarbResid, color="Pool water")) + 
+  geom_line(aes(x=forg, y=OrgResid, color="Evaporated vapor")) +
+  geom_line(aes(x=forg, y=mantle-mantle, color="Initial pool value"), linetype='dotted') + 
+  scale_color_manual(name=NULL, values=c("Pool water" = '#10222B', "Evaporated vapor"='#95AB63', 
+                                         "Initial pool value"='darkgray')) +
+  labs(x='Fraction evaporated', y=expression('δD')) +
+  theme_linedraw()
+```
+
+*These errors significantly exceed analytical error!* Be careful when making assumptions in isotopic modeling! 
+
+If you've made it this far, thanks for sticking around and using the tutorial. I hope you found it somewhat useful and that you're now a step closer to building isotopic box models on your own in R. 
+
+
+
