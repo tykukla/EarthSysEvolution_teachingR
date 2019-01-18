@@ -22,4 +22,6 @@ The same packages as those mentioned above (*Lecture 0*) are required to run thi
 ## Lecture 3: C cycle box model
 We're done with tutorials for a bit! Here, you will find the R script to run a one-box model of the geologic carbon cycle with formulations from and inspired by Kump and Arthur, 1999 (Chemical Geology) and the CLiBeSO model of Jeremy K Caves Rugenstein.
 
+The R script is *KumpArthur_modified.R*
+
 This should serve as an opportunity to test and troubleshoot changing box model parameters as well as a skeleton for the development of your own box model. The derivations required to arrive at the model equations are described in the PDF file: "C_cycle_BoxModel_deriv.PDF".
