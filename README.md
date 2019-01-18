@@ -24,4 +24,4 @@ We're done with tutorials for a bit! Here, you will find the R script to run a o
 
 The R script is *KumpArthur_modified.R*
 
-This should serve as an opportunity to test and troubleshoot changing box model parameters as well as a skeleton for the development of your own box model. The derivations required to arrive at the model equations are described in the PDF file: "C_cycle_BoxModel_deriv.PDF".
+This should serve as an opportunity to test and troubleshoot changing box model parameters as well as a skeleton for the development of your own box model. The derivations required to arrive at the model equations are described in the PDF file: *C_cycle_BoxModel_deriv.PDF*.
